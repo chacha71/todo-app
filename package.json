@@ -1,0 +1,37 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "description": "桌面待办事项悬浮窗",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "build:installer": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.todo.app",
+    "productName": "待办事项",
+    "directories": {
+      "output": "dist"
+    },
+    "icon": "build/icon.ico",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "build/icon.ico"
+    ],
+    "win": {
+      "target": ["portable"],
+      "signAndEditExecutable": false,
+      "artifactName": "待办事项-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "待办事项.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0"
+  }
+}

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>待办事项</title>
+<style>
+:root {
+  --bg: #0c0c10;
+  --surface: #16161f;
+  --border: rgba(255,255,255,0.08);
+  --text: #ece8e1;
+  --text2: #8a857e;
+  --text3: #5a5650;
+  --accent: #4ecdc4;
+  --red: #ff5c5c;
+  --orange: #ff6b35;
+  --purple: #a078ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ 自定义标题栏 ═══ */
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tb-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  -webkit-app-region: drag;
+  height: 100%;
+}
+.tb-title { font-size: 12px; font-weight: 600; color: #fff; }
+.tb-date { font-size: 11px; color: var(--text2); }
+.tb-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+.tb-btn {
+  width: 38px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.tb-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.tb-close:hover { background: #e0556a; color: #fff; }
+
+/* ═══ 内容区 ═══ */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
+
+/* ── 输入行 ────────────────────────── */
+.add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.add-row input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.add-row input:focus { border-color: rgba(78,205,196,0.3); }
+.add-row input::placeholder { color: var(--text3); }
+.add-row button {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #0c0c10;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+.add-row button:active { opacity: 0.7; }
+
+/* ── 分组 ──────────────────────────── */
+.group { margin-bottom: 16px; }
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  margin-bottom: 2px;
+}
+.group-header h2 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+.group-header .count {
+  font-size: 10px;
+  color: var(--text3);
+  background: rgba(255,255,255,0.05);
+  padding: 1px 7px;
+  border-radius: 8px;
+}
+
+/* ── 待办项 ────────────────────────── */
+.todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.todo-item:hover { background: rgba(255,255,255,0.03); }
+
+.todo-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border: 2px solid var(--text3);
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 2px;
+  transition: all 0.2s;
+  position: relative;
+}
+.todo-item input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.todo-item input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0c0c10;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.todo-item .text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+.todo-item.done .text {
+  color: var(--text3);
+  text-decoration: line-through;
+}
+
+.todo-item .del {
+  width: 20px; height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.2s;
+}
+.todo-item:hover .del { opacity: 1; }
+.todo-item .del:hover { background: rgba(255,77,77,0.15); color: var(--red); }
+
+/* ── 空状态 ────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--text3);
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<!-- 自定义标题栏 -->
+<div class="titlebar">
+  <div class="tb-drag">
+    <span class="tb-title">☑ 待办事项</span>
+    <span class="tb-date" id="dateDisplay"></span>
+  </div>
+  <div class="tb-controls">
+    <button class="tb-btn" onclick="electronAPI.minimize()" title="最小化">─</button>
+    <button class="tb-btn" id="maxBtn" onclick="electronAPI.toggleMaximize()" title="最大化">□</button>
+    <button class="tb-btn tb-close" onclick="electronAPI.close()" title="关闭到托盘">✕</button>
+  </div>
+</div>
+
+<!-- 内容 -->
+<div class="content">
+  <div class="add-row">
+    <input id="newTodoInput" placeholder="添加新待办…" maxlength="200" autocomplete="off">
+    <button id="addTodoBtn">添加</button>
+  </div>
+  <div id="todoGroups"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
